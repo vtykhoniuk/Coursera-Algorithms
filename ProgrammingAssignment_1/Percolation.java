@@ -1,70 +1,82 @@
 public class Percolation {
-    private WeightedQuickUnionUF m_uf;
-    private boolean[] m_state;
+    private WeightedQuickUnionUF UF;
+    private boolean[] STATE;
     private int N;
 
-    public Percolation(int N)               // create N-by-N grid, with all sites blocked
+    public Percolation(int N)
     {
+        if (N <= 0) {
+            throw new java.lang.IllegalArgumentException();
+        }
+
         this.N = N;
 
-        m_state = new boolean[N*N+2];
-        m_uf = new WeightedQuickUnionUF(m_state.length);
+        STATE = new boolean[N*N+2];
+        UF = new WeightedQuickUnionUF(STATE.length);
 
         // Two virtual nodes (upper and bottom) that are always openned
-        m_state[0] = true;
-        m_state[1] = true;
+        STATE[0] = true;
+        STATE[1] = true;
     }
 
-    public void open(int i, int j)          // open site (row i, column j) if it is not open already
+    public void open(int i, int j)
     {
-        int current_1d_index = map2Dto1D(i, j);
+        int currentIndex = map2Dto1D(i, j);
 
-        if (m_state[current_1d_index] == true) {
+        if (STATE[currentIndex]) {
             return;
         }
 
-        m_state[current_1d_index] = true;
+        STATE[currentIndex] = true;
 
         if (i == 1) {
-            m_uf.union(current_1d_index, 0);
+            UF.union(currentIndex, 0);
         } else if (i > 1 && isOpen(i-1, j)) {
-            m_uf.union(current_1d_index, map2Dto1D(i-1, j));
+            UF.union(currentIndex, map2Dto1D(i-1, j));
         }
 
         if (i < N && isOpen(i+1, j)) {
-            m_uf.union(current_1d_index, map2Dto1D(i+1, j));
+            UF.union(currentIndex, map2Dto1D(i+1, j));
         }
 
         if (j > 1 && isOpen(i, j-1)) {
-            m_uf.union(current_1d_index, map2Dto1D(i, j-1));
+            UF.union(currentIndex, map2Dto1D(i, j-1));
         }
 
         if (j < N && isOpen(i, j+1)) {
-            m_uf.union(current_1d_index, map2Dto1D(i, j+1));
+            UF.union(currentIndex, map2Dto1D(i, j+1));
         }
 
         // Backwash fix
         if (i == N && isFull(i, j)) {
-            m_uf.union(current_1d_index, 1);
+            UF.union(currentIndex, 1);
+        }
+        
+        if (!percolates()) {
+            for (int k = 1; k <= N; ++k) {
+                if (isFull(N, k)) {
+                    UF.union(currentIndex, 1);
+                }
+            }
         }
     }
 
-    public boolean isOpen(int i, int j)     // is site (row i, column j) open?
+    public boolean isOpen(int i, int j)
     {
-        return m_state[map2Dto1D(i, j)];
+        return STATE[map2Dto1D(i, j)];
     }
 
-    public boolean isFull(int i, int j)     // is site (row i, column j) full?
+    public boolean isFull(int i, int j)
     {
-        return m_uf.connected(map2Dto1D(i, j), 0);
+        return UF.connected(map2Dto1D(i, j), 0);
     }
 
-    public boolean percolates()             // does the system percolate?
+    public boolean percolates()
     {
-        return m_uf.connected(0, 1);
+        return UF.connected(0, 1);
     }
 
-    private int map2Dto1D(int i, int j)     // Maps two-dementional coordinates to 1-dementional
+    private int map2Dto1D(int i, int j)
     {
         if (i < 1 || j < 1 || i > N || j > N) {
             throw new java.lang.IndexOutOfBoundsException();
