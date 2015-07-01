@@ -1,7 +1,8 @@
 public class Percolation {
     private WeightedQuickUnionUF UF;
-    private boolean[] STATE;
-    private int N;
+    private byte[] STATE;
+    private int N = 0;
+    private boolean PERCOLATES = false;
 
     public Percolation(int N)
     {
@@ -11,59 +12,60 @@ public class Percolation {
 
         this.N = N;
 
-        STATE = new boolean[N*N+2];
+        STATE = new byte[N*N+1];
         UF = new WeightedQuickUnionUF(STATE.length);
 
-        // Two virtual nodes (upper and bottom) that are always openned
-        STATE[0] = true;
-        STATE[1] = true;
+        // Two virtual node (upper) that is always openned
+        STATE[0] = 1;
+
+        for (int i = STATE.length - 1; i >= STATE.length - N; --i) {
+            STATE[i] = 2;
+        }
+    }
+
+    private void union(int i, int j)
+    {
+        byte tmp = (byte) (STATE[UF.find(i)] | STATE[UF.find(j)]);
+        UF.union(i, j);
+        STATE[UF.find(i)] = (byte) (STATE[UF.find(i)] | tmp);
     }
 
     public void open(int i, int j)
     {
         int currentIndex = map2Dto1D(i, j);
 
-        if (STATE[currentIndex]) {
+        if ((STATE[currentIndex]&1) == 1) {
             return;
         }
 
-        STATE[currentIndex] = true;
+        STATE[currentIndex] = (byte) (STATE[currentIndex]^1);
 
         if (i == 1) {
-            UF.union(currentIndex, 0);
+            union(currentIndex, 0);
         } else if (i > 1 && isOpen(i-1, j)) {
-            UF.union(currentIndex, map2Dto1D(i-1, j));
+            union(currentIndex, map2Dto1D(i-1, j));
         }
 
         if (i < N && isOpen(i+1, j)) {
-            UF.union(currentIndex, map2Dto1D(i+1, j));
+            union(currentIndex, map2Dto1D(i+1, j));
         }
 
         if (j > 1 && isOpen(i, j-1)) {
-            UF.union(currentIndex, map2Dto1D(i, j-1));
+            union(currentIndex, map2Dto1D(i, j-1));
         }
 
         if (j < N && isOpen(i, j+1)) {
-            UF.union(currentIndex, map2Dto1D(i, j+1));
+            union(currentIndex, map2Dto1D(i, j+1));
         }
 
-        // Backwash fix
-        if (i == N && isFull(i, j)) {
-            UF.union(currentIndex, 1);
-        }
-        
-        if (!percolates()) {
-            for (int k = 1; k <= N; ++k) {
-                if (isFull(N, k)) {
-                    UF.union(currentIndex, 1);
-                }
-            }
+        if (UF.connected(currentIndex, 0) && !PERCOLATES && STATE[UF.find(currentIndex)] == 3) {
+            PERCOLATES = true;
         }
     }
 
     public boolean isOpen(int i, int j)
     {
-        return STATE[map2Dto1D(i, j)];
+        return (STATE[map2Dto1D(i, j)] & 1) == 1;
     }
 
     public boolean isFull(int i, int j)
@@ -73,7 +75,7 @@ public class Percolation {
 
     public boolean percolates()
     {
-        return UF.connected(0, 1);
+        return PERCOLATES;
     }
 
     private int map2Dto1D(int i, int j)
@@ -82,6 +84,6 @@ public class Percolation {
             throw new java.lang.IndexOutOfBoundsException();
         }
 
-        return (i-1)*N + (j-1) + 2;
+        return (i-1)*N + (j-1) + 1;
     }
 }
