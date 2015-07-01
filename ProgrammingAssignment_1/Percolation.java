@@ -34,11 +34,11 @@ public class Percolation {
     {
         int currentIndex = map2Dto1D(i, j);
 
-        if ((STATE[currentIndex]&1) == 1) {
+        if ((STATE[currentIndex] & 1) == 1) {
             return;
         }
 
-        STATE[currentIndex] = (byte) (STATE[currentIndex]^1);
+        STATE[currentIndex] = (byte) (STATE[currentIndex] ^ 1);
 
         if (i == 1) {
             union(currentIndex, 0);
@@ -58,7 +58,9 @@ public class Percolation {
             union(currentIndex, map2Dto1D(i, j+1));
         }
 
-        if (UF.connected(currentIndex, 0) && !PERCOLATES && STATE[UF.find(currentIndex)] == 3) {
+        if (UF.connected(currentIndex, 0)
+            && !PERCOLATES
+            && STATE[UF.find(currentIndex)] == 3) {
             PERCOLATES = true;
         }
     }
