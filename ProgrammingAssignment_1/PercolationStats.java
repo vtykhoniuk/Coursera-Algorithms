@@ -31,18 +31,13 @@ public class PercolationStats {
             } while (!p.percolates());
 
             X[i] = (double) opennedSites/(N*N);
-            meanX += X[i];
         }
 
-        MEAN = meanX/T;
+        MEAN = StdStats.mean(X);
+        STDDEV = StdStats.stddev(X);
 
-        for (int i = 0; i < X.length; ++i) {
-            devidend += (X[i] - MEAN)*(X[i] - MEAN);
-        }
-        STDDEV = devidend/(X.length-1);
-
-        CLO = MEAN-1.96*MEAN/java.lang.Math.sqrt(T);
-        CHI = MEAN+1.96*MEAN/java.lang.Math.sqrt(T);
+        CLO = MEAN-1.96*STDDEV/java.lang.Math.sqrt(T);
+        CHI = MEAN+1.96*STDDEV/java.lang.Math.sqrt(T);
     }
 
     public double mean()
