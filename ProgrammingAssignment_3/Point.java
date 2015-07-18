@@ -42,18 +42,19 @@ public class Point implements Comparable<Point> {
 
     // slope between this point and that point
     public double slopeTo(Point that) {
+        // Degenerate segment
         if (this.x == that.x && this.y == that.y)
             return Double.NEGATIVE_INFINITY;
 
         // Horizontal line
         if (this.y == that.y)
-            return (double) +0;
+            return (double) 0d;
 
         // Vertical line
         if (this.x == that.x)
             return Double.POSITIVE_INFINITY;
 
-        return double (that.y - this.y) / (that.x - this.x);
+        return (that.y - this.y) / (that.x - this.x);
     }
 
     // is this point lexicographically smaller than that one?
