@@ -42,6 +42,9 @@ public class Point implements Comparable<Point> {
 
     // slope between this point and that point
     public double slopeTo(Point that) {
+        if (that == null)
+            throw new java.lang.NullPointerException();
+
         // Degenerate segment
         if (this.x == that.x && this.y == that.y)
             return Double.NEGATIVE_INFINITY;
@@ -54,12 +57,15 @@ public class Point implements Comparable<Point> {
         if (this.x == that.x)
             return Double.POSITIVE_INFINITY;
 
-        return (that.y - this.y) / (that.x - this.x);
+        return (double) (that.y - this.y) / (that.x - this.x);
     }
 
     // is this point lexicographically smaller than that one?
     // comparing y-coordinates and breaking ties by x-coordinates
     public int compareTo(Point that) {
+        if (that == null)
+            throw new java.lang.NullPointerException();
+
         if (this.x == that.x && this.y == that.y)
             return 0;
         else if (this.y < that.y || (this.y == that.y && this.x < that.x))
@@ -77,14 +83,24 @@ public class Point implements Comparable<Point> {
     // unit test
     public static void main(String[] args) {
         /* YOUR CODE HERE */
+        Point p = new Point(4, 4);
+        Point q = new Point(4, 6);
+        Point r = new Point(4, 4);
+
+        System.out.println(p.SLOPE_ORDER.compare(q, r));
+        System.out.println(p.slopeTo(r));
+        System.out.println(p.slopeTo(r));
     }
 
     private class BySlope implements Comparator<Point> {
         public int compare(Point v, Point w) {
+            if (v == null || w == null)
+                throw new java.lang.NullPointerException();
+
             double vd = Point.this.slopeTo(v);
             double wd = Point.this.slopeTo(w);
 
-            if (vd == wd )      return 0;
+            if (vd == wd)       return 0;
             else if (vd < wd)   return -1;
             else                return 1;
         }
