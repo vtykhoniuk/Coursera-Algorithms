@@ -1,40 +1,34 @@
 import java.util.Comparator;
 
 public class Solver {
-    Queue<Board> solution;
+    Stack<Board> solution;
     boolean isSolvable;
 
     public Solver(Board initial) {
         isSolvable = true;
-
-        solution = new Queue<Board>();
+        solution = new Stack<Board>();
 
         MinPQ<PuzzleNode> queue = new MinPQ<PuzzleNode>(1, new PuzzleNodeComparator());
         queue.insert(new PuzzleNode(initial, 0, null));
 
+        PuzzleNode node;
+
         do {
-//            System.out.println("\n-----------------");
-//            for (PuzzleNode n : queue)
-//                System.out.println(n);
-
-            PuzzleNode node = queue.delMin();
-            while (! queue.isEmpty())
-                queue.delMin();
-//            System.out.println("Min:");
-//            System.out.println(node);
-
+            node = queue.delMin();
             Board b = node.board();
-
-            solution.enqueue(b);
-            int moves = node.moves();
 
             if (b.isGoal())
                 break;
 
             for (Board neighbor : b.neighbors())
                 if (node.prevNode() == null || ! neighbor.equals(node.prevNode().board()))
-                    queue.insert(new PuzzleNode(neighbor, moves+1, node));
+                    queue.insert(new PuzzleNode(neighbor, node.moves()+1, node));
         } while (queue.size() > 0);
+
+        while (node != null) {
+            solution.push(node.board());
+            node = node.prevNode();
+        }
     }
 
     public int moves() {
