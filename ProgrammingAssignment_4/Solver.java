@@ -11,24 +11,37 @@ public class Solver {
         MinPQ<PuzzleNode> queue = new MinPQ<PuzzleNode>(1, new PuzzleNodeComparator());
         queue.insert(new PuzzleNode(initial, 0, null));
 
+        MinPQ<PuzzleNode> twinQueue = new MinPQ<PuzzleNode>(1, new PuzzleNodeComparator());
+        twinQueue.insert(new PuzzleNode(initial.twin(), 0, null));
+
+        Bag<MinPQ<PuzzleNode>> queueBag = new Bag<MinPQ<PuzzleNode>>();
+        queueBag.add(queue);
+        queueBag.add(twinQueue);
+
         PuzzleNode node;
 
+OUTER:
+        while (true) {
+            for (MinPQ<PuzzleNode> q : queueBag) {
+                node    = q.delMin();
+                Board b = node.board();
+
+                if (b.isGoal())
+                    break OUTER;
+
+                for (Board neighbor : b.neighbors())
+                    if (node.prevNode() == null || ! neighbor.equals(node.prevNode().board()))
+                        q.insert(new PuzzleNode(neighbor, node.moves()+1, node));
+            }
+        }
+
         do {
-            node = queue.delMin();
-            Board b = node.board();
-
-            if (b.isGoal())
-                break;
-
-            for (Board neighbor : b.neighbors())
-                if (node.prevNode() == null || ! neighbor.equals(node.prevNode().board()))
-                    queue.insert(new PuzzleNode(neighbor, node.moves()+1, node));
-        } while (queue.size() > 0);
-
-        while (node != null) {
             solution.push(node.board());
             node = node.prevNode();
-        }
+        } while (node != null);
+
+        if (! solution.peek().equals(initial))
+            isSolvable = false;
     }
 
     public int moves() {
@@ -80,17 +93,7 @@ public class Solver {
         int moves() { return moves; }
         Board board() { return board; }
         PuzzleNode prevNode() { return prevNode; }
-
-        public String toString() {
-            StringBuffer buffer = new StringBuffer();
-
-            buffer.append("Moves: " + this.moves + "\n");
-            buffer.append("Hamming: " + this.board.hamming() + "\n");
-            buffer.append("Manhattan: " + this.board.manhattan() + "\n");
-            buffer.append(this.board.toString());
-
-            return buffer.toString();
-        }
+        int priority() { return board.manhattan() + moves; }
     }
 
     private static class PuzzleNodeComparator implements Comparator<PuzzleNode> {
@@ -101,12 +104,19 @@ public class Solver {
             if (v == w)
                 return 0;
 
-            int vS = v.board().hamming() + v.board().manhattan() + v.moves();
-            int wS = w.board().hamming() + w.board().manhattan() + w.moves();
+            int vP = v.priority();
+            int wP = w.priority();
 
-            if      (vS == wS)  return 0;
-            else if (vS < wS)   return -1;
-            else                return 1;
+            if      (vP < wP)
+                return -1;
+            else if (vP > wP)
+                return 1;
+            else if (v.board.hamming() < w.board.hamming())
+                return -1;
+            else if (v.board.hamming() > w.board.hamming())
+                return 1;
+            else
+                return 0;
         }
     }
 }

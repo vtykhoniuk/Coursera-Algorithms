@@ -44,10 +44,10 @@ public class Board {
                 if (a[i][j] == 0)
                     continue;
 
-                int right_i = (a[i][j] - 1) / N; 
-                int right_j = a[i][j] - 1 - right_i * N;
+                int righti = (a[i][j] - 1) / N; 
+                int rightj = a[i][j] - 1 - righti * N;
 
-                distance += java.lang.Math.abs(i - right_i) + java.lang.Math.abs(j - right_j);
+                distance += java.lang.Math.abs(i - righti) + java.lang.Math.abs(j - rightj);
             }
         }
 
@@ -159,40 +159,43 @@ public class Board {
     }
 
     public String toString() {
-        StringBuffer buffer = new StringBuffer();
-
-        for (int i = 0; i < N; ++i) {
-            for (int j = 0; j < N; ++j) {
-                if (j > 0)
-                    buffer.append(" ");
-
-                buffer.append(a[i][j]);
+        StringBuilder s = new StringBuilder();
+        s.append(N + "\n");
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                s.append(String.format("%2d ", a[i][j]));
             }
-
-            buffer.append("\n");
+            s.append("\n");
         }
-
-        return buffer.toString();
+        return s.toString();
     }
 
     public static void main(String[] args) {
         int b[][] = {
-            {1, 2, 3},
-            {4, 0, 6},
-            {7, 8, 5},
+                {0, 2,  3, 4},
+                {5,  6,  7, 8},
+                {9, 10, 11, 12},
+                {13, 14, 15, 1}
         };
 
         Board board = new Board(b);
-        System.out.println(board);
         System.out.println("Hamming: " + board.hamming());
         System.out.println("Manhatten: " + board.manhattan());
+        System.out.println("----------------");
+        System.out.println(board);
 
+        /*
         Board twin = board.twin();
         System.out.println(twin);
 
         System.out.println(board.equals(board));
+        */
 
+        System.out.println("Neighbors:");
         for (Board neighbor : board.neighbors()) {
+            System.out.println("Hamming: " + neighbor.hamming());
+            System.out.println("Manhatten: " + neighbor.manhattan());
+            System.out.println("----------------");
             System.out.println(neighbor);
         }
     }
